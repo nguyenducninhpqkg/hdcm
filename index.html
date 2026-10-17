@@ -35,7 +35,11 @@ var WEB_URL = 'https://script.google.com/macros/s/AKfycbwYZCLoldvn80jR2R9ZKLyfAb
 var KHOA = 'hdcm_app_tk';      // phiên đăng nhập giữ ở vỏ app (iPhone hay xóa bộ nhớ của trang nhúng)
 var web = document.getElementById('web'), cho = document.getElementById('cho');
 document.getElementById('moNgoai').href = WEB_URL;
-web.src = WEB_URL;
+// iPhone/iPad: Safari (và mọi trình duyệt trên iPhone) chặn cookie Google khi trang bị nhúng → lỗi 401.
+// Nên trên iPhone/iPad, app chuyển thẳng sang link web gốc thay vì nhúng.
+var LA_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+if (LA_IOS) { document.querySelector('#cho p').textContent = 'Đang mở HĐCM…'; location.replace(WEB_URL); }
+else web.src = WEB_URL;
 web.addEventListener('load', function(){ setTimeout(function(){ cho.className = 'an'; }, 600); });
 setTimeout(function(){ if(cho.className !== 'an') cho.className = 'lau'; }, 12000);
 

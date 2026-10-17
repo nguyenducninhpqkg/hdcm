@@ -1,5 +1,5 @@
 // Chỉ lưu sẵn phần vỏ app (logo, trang khung) để mở nhanh. Web HĐCM bên trong luôn tải mới từ Google.
-var BAN = 'hdcm-vo-2';
+var BAN = 'hdcm-vo-3';
 var VO = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'];
 self.addEventListener('install', function (e) { e.waitUntil(caches.open(BAN).then(function (c) { return c.addAll(VO); })); self.skipWaiting(); });
 self.addEventListener('activate', function (e) {
