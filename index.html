@@ -19,26 +19,64 @@
        padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);box-sizing:border-box}
   #cho{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--nen);transition:opacity .3s}
   #cho.an{opacity:0;pointer-events:none}
-  #cho img{width:360px;height:360px;border-radius:50%}
+  #cho img{width:200px;height:200px;border-radius:50%}
   #cho p{margin:0;font-size:14px;color:#5b6577}
   #cho a{display:none;font-size:14px;color:var(--do)}
   #cho.lau a{display:block}
+  /* Màn hình cài đặt cho iPhone/iPad (chỉ hiện khi mở link có ?cai) */
+  #cai{display:none;position:fixed;inset:0;overflow:auto;background:var(--nen);
+       padding:calc(env(safe-area-inset-top) + 28px) 22px calc(env(safe-area-inset-bottom) + 28px);box-sizing:border-box;text-align:center}
+  #cai.hien{display:block}
+  #cai img{width:132px;height:132px;border-radius:50%}
+  #cai h1{font-size:22px;margin:14px 0 4px;color:#b8412f}
+  #cai .phu{margin:0 0 22px;color:#5b6577;font-size:15px}
+  #cai ol{text-align:left;margin:0 auto 24px;padding:16px 18px 16px 38px;max-width:420px;background:#eef2fa;border-radius:14px;font-size:16px;line-height:1.55}
+  #cai li{margin:4px 0}
+  #cai b{color:var(--do)}
+  #cai svg{width:18px;height:18px;vertical-align:-3px;fill:none;stroke:#0a6cff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  #cai .nut{display:inline-block;background:#1d2a44;color:#fff;text-decoration:none;font-weight:600;font-size:17px;padding:13px 30px;border-radius:12px}
 </style>
 </head>
 <body>
 <iframe id="web" title="HĐCM 2026-2027" allow="clipboard-write"></iframe>
-<div id="cho"><img src="icon-192.png" alt=""><p>Đang mở HĐCM…</p>
+<div id="cho"><img src="icon-512.png" alt=""><p>Đang mở HĐCM…</p>
   <a id="moNgoai" target="_blank" rel="noopener">Mạng chậm? Bấm để mở bằng trình duyệt</a></div>
+<div id="cai">
+  <img src="icon-512.png" alt="">
+  <h1>HĐCM 2026-2027</h1>
+  <p class="phu">Trường THPT Nguyễn Hùng Sơn</p>
+  <ol>
+    <li>Bấm nút <b>Chia sẻ</b>
+      <svg viewBox="0 0 24 24"><path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M6 11H5v10h14V11h-1"/></svg>
+      trên thanh công cụ của Safari.</li>
+    <li>Kéo xuống, chọn <b>Thêm vào MH chính</b>.</li>
+    <li>Bấm <b>Thêm</b>. Biểu tượng HĐCM sẽ có trên màn hình chính.</li>
+  </ol>
+  <a class="nut" id="moWeb">Mở HĐCM ngay</a>
+</div>
 <script>
 // Vỏ app: chỉ nhúng web HĐCM (Apps Script) vào toàn màn hình. Mọi dữ liệu, đăng nhập, quyền vẫn ở web gốc.
 var WEB_URL = 'https://script.google.com/macros/s/AKfycbwYZCLoldvn80jR2R9ZKLyfAbMa9z_FCQ39BTseukgGpcy_Ua7tV6iP0zTMyP3KWXQ/exec';
 var KHOA = 'hdcm_app_tk';      // phiên đăng nhập giữ ở vỏ app (iPhone hay xóa bộ nhớ của trang nhúng)
 var web = document.getElementById('web'), cho = document.getElementById('cho');
 document.getElementById('moNgoai').href = WEB_URL;
+document.getElementById('moWeb').href = WEB_URL;
+
+// Link cài đặt: …/hdcm/?cai (dùng chung cho mọi máy, ghi trên poster/clip hướng dẫn).
+// Xóa ?cai khỏi địa chỉ ngay, để biểu tượng được lưu với link sạch …/hdcm/.
+var LINK_CAI = /[?&]cai(=|&|$)/.test(location.search) || location.hash === '#cai';
+if (LINK_CAI) { try { history.replaceState(null, '', location.pathname); } catch (x) {} }
+var LA_APP = window.navigator.standalone === true ||
+             (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+
 // iPhone/iPad: Safari (và mọi trình duyệt trên iPhone) chặn cookie Google khi trang bị nhúng → lỗi 401.
 // Nên trên iPhone/iPad, app chuyển thẳng sang link web gốc thay vì nhúng.
+// Riêng khi mở bằng link cài đặt (?cai) trong Safari: dừng lại ở trang này để GV kịp "Thêm vào MH chính".
 var LA_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-if (LA_IOS) { document.querySelector('#cho p').textContent = 'Đang mở HĐCM…'; location.replace(WEB_URL); }
+if (LA_IOS) {
+  if (LINK_CAI && !LA_APP) { cho.className = 'an'; document.getElementById('cai').className = 'hien'; }
+  else location.replace(WEB_URL);
+}
 else web.src = WEB_URL;
 web.addEventListener('load', function(){ setTimeout(function(){ cho.className = 'an'; }, 600); });
 setTimeout(function(){ if(cho.className !== 'an') cho.className = 'lau'; }, 12000);
